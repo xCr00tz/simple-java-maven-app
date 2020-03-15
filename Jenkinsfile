@@ -11,8 +11,16 @@ pipeline {
                 }
             }
             stage('Sonarqube') {
-                steps{
-                    sh 'pwd && ls -lah'
+                environment {
+                    scannerHome = tool 'SonarQube'
+                }
+                steps {
+                    withSonarQubeEnv('sonarqube') {
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
+                    timeout(time: 10, unit: 'MINUTES') {
+                        waitForQualityGate abortPipeline: true
+                    }
                 }
             }
             stage('Test') {
